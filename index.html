@@ -1293,43 +1293,27 @@ margin-bottom: 0.4rem;
         </div>
     </footer>
 
-    <script>
+   <script>
         (function() {
+            // Данные
             const tracksData = [
-                {
-                    id: 1, 
-                    title: 'Запятая у окна', 
-                    titleEn: 'Comma by the Window', 
-                    category: 'pop-rap', 
-                    cover: 'Запятая у окна.png', 
-                    desc: 'Сингл в стиле синт-поп.', 
-                    descEn: 'Synth-pop single.', 
-                    lyrics: 'Все по двое...',
-                    lyricsEn: 'Everyone...',
-                    downloads: 0,
-                    audioSrc: 'zapyataya.mp3',
-                    likes: 35 
-                }
+                { id: 1, title: 'Запятая у окна', category: 'pop-rap', cover: 'Запятая у окна.png', audioSrc: 'zapyataya.mp3' }
             ];
 
-            // Основные переменные
             const audioElement = document.getElementById('audioElement');
             const playerPlay = document.getElementById('playerPlay');
+            const musicGrid = document.getElementById('musicGrid');
             let isPlaying = false;
-            let currentTrackIndex = 0;
 
+            // Функции плеера
             function loadTrack(index) {
-                currentTrackIndex = index;
                 audioElement.src = tracksData[index].audioSrc;
                 audioElement.load();
             }
 
             function togglePlay() {
                 if (audioElement.paused) {
-                    audioElement.play().then(() => {
-                        isPlaying = true;
-                        playerPlay.textContent = '⏸';
-                    }).catch(e => console.error("Ошибка запуска:", e));
+                    audioElement.play().then(() => { isPlaying = true; playerPlay.textContent = '⏸'; });
                 } else {
                     audioElement.pause();
                     isPlaying = false;
@@ -1337,16 +1321,32 @@ margin-bottom: 0.4rem;
                 }
             }
 
-            playerPlay.addEventListener('click', togglePlay);
-
-            // Регулятор громкости
-            const volumeSlider = document.getElementById('volumeSlider');
-            if (volumeSlider) {
-                volumeSlider.addEventListener('input', (e) => {
-                    audioElement.volume = e.target.value;
+            // Функция отрисовки карточек (ВОТ ЭТО ТЕБЕ НУЖНО БЫЛО!)
+            function renderTracks() {
+                if (!musicGrid) return;
+                musicGrid.innerHTML = '';
+                tracksData.forEach(track => {
+                    const card = document.createElement('div');
+                    card.className = 'track-card fade-in-up visible'; // visible, чтобы сразу были видны
+                    card.innerHTML = `
+                        <img class="track-cover" src="${track.cover}" alt="${track.title}">
+                        <div class="track-title">${track.title}</div>
+                        <button class="btn-icon play-track-btn">▶</button>
+                    `;
+                    card.querySelector('.play-track-btn').onclick = () => { loadTrack(0); togglePlay(); };
+                    musicGrid.appendChild(card);
                 });
             }
 
+            // Инициализация
+            playerPlay.addEventListener('click', togglePlay);
+            const volumeSlider = document.getElementById('volumeSlider');
+            if (volumeSlider) {
+                volumeSlider.addEventListener('input', (e) => audioElement.volume = e.target.value);
+            }
+
+            renderTracks(); // Вызываем отрисовку!
+            loadTrack(0);
             console.log('DarkSpirit Portfolio — Ready.');
         })();
     </script>
