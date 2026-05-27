@@ -1443,6 +1443,39 @@ margin-bottom: 0.4rem;
             }, { threshold: 0.3 });
             observer.observe(heroStats);
         }
+        // --- Доработка: кнопка "Слушать" включает/ставит на паузу текущий трек ---
+// Переопределяем функцию playTrackById
+window.playTrackById = function(id) {
+    let idx = tracksData.findIndex(t => t.id === id);
+    if (idx === -1) return;
+    
+    const audio = document.getElementById('audioElement');
+    const playBtn = document.getElementById('playerPlay');
+    
+    // Если нажали на трек, который уже играет и не на паузе
+    if (currentIndex === idx && !audio.paused) {
+        audio.pause();
+        isPlaying = false;
+        playBtn.innerText = '▶';
+    } else {
+        // Иначе загружаем выбранный трек
+        currentIndex = idx;
+        loadTrack(currentIndex);
+        audio.play()
+            .then(() => {
+                isPlaying = true;
+                playBtn.innerText = '⏸';
+            })
+            .catch(e => console.warn(e));
+    }
+};
+
+// Синхронизация кнопки плеера при окончании трека
+const audioElem = document.getElementById('audioElement');
+audioElem.addEventListener('ended', function() {
+    isPlaying = false;
+    document.getElementById('playerPlay').innerText = '▶';
+});
     })();
 </script>
 </body>
