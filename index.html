@@ -1394,6 +1394,44 @@ if (heroPlayBtn) {
             window.playTrackById(1);     // запускаем трек с id=1
         } else {
             console.warn('playTrackById не найдена');
+
+            // === Анимация счётчиков в блоке героя ===
+function startCounters() {
+    const counters = [
+        { element: document.getElementById('statPlatforms'), target: 30, suffix: '+' },
+        { element: document.getElementById('statStreams'), target: 902456, suffix: '' },
+        { element: document.getElementById('statTracks'), target: 107, suffix: '' }
+    ];
+
+    counters.forEach(counter => {
+        if (!counter.element) return;
+        let current = 0;
+        const step = Math.ceil(counter.target / 50); // за 50 шагов
+        const timer = setInterval(() => {
+            current += step;
+            if (current >= counter.target) {
+                counter.element.innerText = counter.target + counter.suffix;
+                clearInterval(timer);
+            } else {
+                counter.element.innerText = current + counter.suffix;
+            }
+        }, 30);
+    });
+}
+
+// Запускаем счётчики, когда блок героя становится видимым (или сразу, если уже виден)
+const heroStats = document.querySelector('.hero-stats');
+if (heroStats) {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                startCounters();
+                observer.disconnect(); // отработали один раз
+            }
+        });
+    }, { threshold: 0.3 });
+    observer.observe(heroStats);
+}
         }
     });
 }
