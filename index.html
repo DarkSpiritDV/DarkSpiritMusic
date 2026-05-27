@@ -1301,11 +1301,11 @@ margin-bottom: 0.4rem;
 
   <script>
     (function() {
-        // === ДАННЫЕ ТРЕКОВ (добавьте свои) ===
+        // === ДАННЫЕ ТРЕКОВ ===
         const tracksData = [
             { id:1, title:'Запятая у окна (фрагмент)', titleEn:'Comma by the Window', category:'pop-rap', cover:'Запятая у окна.png', audioSrc:'zapyataya.mp3', downloads:4, likes:3 },
             { id:2, title:'Soul and Stream (фрагмент)', titleEn:'Soul and Stream', category:'pop-rap', cover:'Soul and Stream.jpg', audioSrc:'SoulandStream.mp3', downloads:2, likes:6 },
-            { id:3, title:'Пробки заебали (фрагмент)', titleEn:'Soul and Stream', category:'thematic', cover:'Пробки заебали.png', audioSrc:'Probki.mp3', downloads:8, likes:10 }
+            { id:3, title:'Пробки заебали (фрагмент)', titleEn:'Traffic Jams', category:'thematic', cover:'Пробки заебали.png', audioSrc:'Probki.mp3', downloads:8, likes:10 }
         ];
 
         // === ЭЛЕМЕНТЫ ПЛЕЕРА ===
@@ -1329,7 +1329,7 @@ margin-bottom: 0.4rem;
             audio.src = t.audioSrc;
             audio.load();
             trackNameSpan.innerText = t.title;
-            coverImg.src = t.cover || 'data:image/svg+xml,%3Csvg%3E...';
+            coverImg.src = t.cover || 'data:image/svg+xml,%3Csvg%3E';
             progressFill.style.width = '0%';
             timeSpan.innerText = '0:00';
         }
@@ -1348,13 +1348,13 @@ margin-bottom: 0.4rem;
         function updateProgress() { if(audio.duration) { let per = (audio.currentTime/audio.duration)*100; progressFill.style.width=per+'%'; let mins=Math.floor(audio.currentTime/60), secs=Math.floor(audio.currentTime%60); timeSpan.innerText=mins+':'+(secs<10?'0':'')+secs; } }
         function setProgress(e) { let rect=progressBg.getBoundingClientRect(), perc=(e.clientX-rect.left)/rect.width; if(audio.duration) audio.currentTime=perc*audio.duration; }
 
-        playBtn.onclick=togglePlay;
-        prevBtn.onclick=prev;
-        nextBtn.onclick=next;
-        audio.addEventListener('timeupdate',updateProgress);
-        audio.addEventListener('ended',next);
-        progressBg.addEventListener('click',setProgress);
-        if(volumeSlider) volumeSlider.oninput=(e)=>audio.volume=e.target.value;
+        playBtn.onclick = togglePlay;
+        prevBtn.onclick = prev;
+        nextBtn.onclick = next;
+        audio.addEventListener('timeupdate', updateProgress);
+        audio.addEventListener('ended', next);
+        progressBg.addEventListener('click', setProgress);
+        if(volumeSlider) volumeSlider.oninput = (e) => audio.volume = e.target.value;
 
         // === ОТРИСОВКА СЕТКИ МУЗЫКИ ===
         const musicGrid = document.getElementById('musicGrid');
@@ -1362,7 +1362,7 @@ margin-bottom: 0.4rem;
             if(!musicGrid) return;
             musicGrid.innerHTML = tracksData.map(t => `
                 <div class="track-card">
-                    <img class="track-cover" src="${t.cover||''}" onerror="this.src='data:image/svg+xml,%3Csvg%3E'">
+                    <img class="track-cover" src="${t.cover || ''}" onerror="this.src='data:image/svg+xml,%3Csvg%3E'">
                     <div class="track-title">${t.title}</div>
                     <div class="track-meta">DarkSpirit</div>
                     <button class="btn-sm btn-primary" onclick="window.playTrackById(${t.id})">▶ Слушать</button>
@@ -1370,13 +1370,21 @@ margin-bottom: 0.4rem;
                 </div>
             `).join('');
         }
+
         window.playTrackById = function(id) {
-            let idx = tracksData.findIndex(t=>t.id===id);
-            if(idx!==-1) { currentIndex=idx; loadTrack(currentIndex); audio.play().then(()=>{isPlaying=true;playBtn.innerText='⏸';}); }
+            let idx = tracksData.findIndex(t => t.id === id);
+            if(idx !== -1) {
+                currentIndex = idx;
+                loadTrack(currentIndex);
+                audio.play().then(() => {
+                    isPlaying = true;
+                    playBtn.innerText = '⏸';
+                }).catch(e => console.warn(e));
+            }
         };
         renderMusic();
 
-        // === ПРИНУДИТЕЛЬНОЕ ОТОБРАЖЕНИЕ ВСЕХ СЕКЦИЙ (УБИРАЕМ ЗАВИСАНИЕ АНИМАЦИИ) ===
+        // === ПРИНУДИТЕЛЬНОЕ ОТОБРАЖЕНИЕ СЕКЦИЙ ===
         document.querySelectorAll('.fade-in-up, .fade-in').forEach(el => {
             el.classList.add('visible');
             el.style.opacity = '1';
@@ -1385,119 +1393,56 @@ margin-bottom: 0.4rem;
 
         // === ЗАГРУЗКА ПЕРВОГО ТРЕКА ===
         if(tracksData.length) loadTrack(0);
-        // Кнопка "Слушать свежий релиз" запускает трек id = 1
-const heroPlayBtn = document.querySelector('.hero .btn-primary');
-if (heroPlayBtn) {
-    heroPlayBtn.addEventListener('click', (e) => {
-        e.preventDefault();             // отменяем переход по якорю #music
-        if (typeof window.playTrackById === 'function') {
-            window.playTrackById(1);     // запускаем трек с id=1
-        } else {
-            console.warn('playTrackById не найдена');
 
-            // === ПЕРЕКЛЮЧЕНИЕ ЯЗЫКА ===
-let currentLanguage = localStorage.getItem('language') || 'ru';
-
-function updateLanguage(lang) {
-    currentLanguage = lang;
-    localStorage.setItem('language', lang);
-    
-    // 1. Меняем текст у элементов с data-ru / data-en
-    document.querySelectorAll('[data-ru][data-en]').forEach(el => {
-        const text = lang === 'ru' ? el.getAttribute('data-ru') : el.getAttribute('data-en');
-        if (text) el.innerText = text;
-    });
-    
-    // 2. Обновляем заголовки треков в каталоге (перерисовываем)
-    if (typeof renderMusic === 'function') {
-        renderMusic();
-    } else if (typeof renderMusicCatalog === 'function') {
-        renderMusicCatalog();
-    } else {
-        // Если функция отрисовки называется иначе – пропишите её имя
-        // Либо обновляем вручную:
-        const musicGrid = document.getElementById('musicGrid');
-        if (musicGrid && typeof tracksData !== 'undefined') {
-            musicGrid.innerHTML = tracksData.map(t => `
-                <div class="track-card">
-                    <img class="track-cover" src="${t.cover || ''}" onerror="this.src='data:image/svg+xml,%3Csvg%3E'">
-                    <div class="track-title">${lang === 'ru' ? t.title : t.titleEn}</div>
-                    <div class="track-meta">DarkSpirit</div>
-                    <button class="btn-sm btn-primary" onclick="window.playTrackById(${t.id})">▶ ${lang === 'ru' ? 'Слушать' : 'Play'}</button>
-                    <div class="dl-count">📥 ${t.downloads}</div>
-                </div>
-            `).join('');
+        // === КНОПКА "СЛУШАТЬ СВЕЖИЙ РЕЛИЗ" (запускает трек с id=1) ===
+        const heroPlayBtn = document.querySelector('.hero .btn-primary');
+        if (heroPlayBtn) {
+            heroPlayBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (typeof window.playTrackById === 'function') {
+                    window.playTrackById(1);
+                } else {
+                    console.warn('playTrackById не найдена');
+                }
+            });
         }
-    }
-    
-    // 3. Обновляем название трека в плеере, если он загружен
-    const playerTrackSpan = document.getElementById('playerTrack');
-    if (playerTrackSpan && typeof currentTrackIndex !== 'undefined' && tracksData[currentTrackIndex]) {
-        const track = tracksData[currentTrackIndex];
-        playerTrackSpan.innerText = lang === 'ru' ? track.title : track.titleEn;
-    }
-    
-    // 4. Меняем активный класс у кнопок
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        if (btn.dataset.lang === lang) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
+
+        // === АНИМАЦИЯ СЧЁТЧИКОВ ===
+        function startCounters() {
+            const counters = [
+                { element: document.getElementById('statPlatforms'), target: 30, suffix: '+' },
+                { element: document.getElementById('statStreams'), target: 902456, suffix: '' },
+                { element: document.getElementById('statTracks'), target: 107, suffix: '' }
+            ];
+            counters.forEach(counter => {
+                if (!counter.element) return;
+                let current = 0;
+                const step = Math.ceil(counter.target / 50);
+                const timer = setInterval(() => {
+                    current += step;
+                    if (current >= counter.target) {
+                        counter.element.innerText = counter.target + counter.suffix;
+                        clearInterval(timer);
+                    } else {
+                        counter.element.innerText = current + counter.suffix;
+                    }
+                }, 30);
+            });
         }
-    });
-}
 
-// Навешиваем обработчики на кнопки языка
-document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        const lang = btn.dataset.lang;
-        if (lang) updateLanguage(lang);
-    });
-});
-
-// Запускаем язык по сохранённому значению при загрузке
-updateLanguage(currentLanguage);
-
-            // === Анимация счётчиков в блоке героя ===
-function startCounters() {
-    const counters = [
-        { element: document.getElementById('statPlatforms'), target: 30, suffix: '+' },
-        { element: document.getElementById('statStreams'), target: 902456, suffix: '' },
-        { element: document.getElementById('statTracks'), target: 107, suffix: '' }
-    ];
-
-    counters.forEach(counter => {
-        if (!counter.element) return;
-        let current = 0;
-        const step = Math.ceil(counter.target / 50); // за 50 шагов
-        const timer = setInterval(() => {
-            current += step;
-            if (current >= counter.target) {
-                counter.element.innerText = counter.target + counter.suffix;
-                clearInterval(timer);
-            } else {
-                counter.element.innerText = current + counter.suffix;
-            }
-        }, 30);
-    });
-}
-
-// Запускаем счётчики, когда блок героя становится видимым (или сразу, если уже виден)
-const heroStats = document.querySelector('.hero-stats');
-if (heroStats) {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                startCounters();
-                observer.disconnect(); // отработали один раз
-            }
-        });
-    }, { threshold: 0.3 });
-    observer.observe(heroStats);
-}
+        // Запускаем счётчики, когда блок статистики появляется в зоне видимости
+        const heroStats = document.querySelector('.hero-stats');
+        if (heroStats) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        startCounters();
+                        observer.disconnect();
+                    }
+                });
+            }, { threshold: 0.3 });
+            observer.observe(heroStats);
         }
-    });
-}
     })();
 </script>
 </body>
