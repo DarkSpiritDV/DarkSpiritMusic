@@ -384,6 +384,54 @@
                     }
                 });
             }
+
+            // === ПЕРЕКЛЮЧЕНИЕ ЯЗЫКА (RU / EN) ===
+let currentLang = localStorage.getItem('lang') || 'ru';
+
+function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    
+    // Меняем текст у всех элементов с data-ru и data-en
+    document.querySelectorAll('[data-ru][data-en]').forEach(el => {
+        const text = lang === 'ru' ? el.getAttribute('data-ru') : el.getAttribute('data-en');
+        if (text) el.innerText = text;
+    });
+    
+    // Обновляем активный класс у кнопок
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        if (btn.dataset.lang === lang) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // Обновляем название текущего трека в плеере
+    if (typeof currentIndex !== 'undefined' && tracksData[currentIndex]) {
+        const track = tracksData[currentIndex];
+        const trackNameSpan = document.getElementById('playerTrack');
+        if (trackNameSpan) {
+            trackNameSpan.innerText = lang === 'ru' ? track.title : track.titleEn;
+        }
+    }
+    
+    // Обновляем названия треков в каталоге (перерисовываем)
+    if (typeof renderMusic === 'function') {
+        renderMusic();
+    }
+}
+
+// Навешиваем обработчики на кнопки языка
+document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const lang = btn.dataset.lang;
+        if (lang) setLanguage(lang);
+    });
+});
+
+// Устанавливаем язык при загрузке
+setLanguage(currentLang);
         })();
     </script>
 </body>
