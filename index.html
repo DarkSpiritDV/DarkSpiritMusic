@@ -1424,80 +1424,24 @@ margin-bottom: 0.4rem;
 
             document.querySelectorAll('.stat-number').forEach(el => counterObserver.observe(el));
 
-            // ============ MUSIC DATA ============
-            const tracksData = [{
-                id: 1,
-                title: 'Пепел',
-                titleEn: 'Ashes',
-                category: 'pop-rap',
-                cover: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="%231a1a25" width="200" height="200"/><text x="100" y="108" text-anchor="middle" fill="%238b3a4a" font-size="20" font-family="sans-serif">🔥</text></svg>',
-                desc: 'Главный сингл с альбома. Мощный бит и исповедальный текст.',
-                descEn: 'Lead single from the album. Powerful beat and confessional lyrics.',
-                lyrics: 'Строки о том, что остаётся после огня...\nПепел на ветру, но я всё ещё здесь.',
-                lyricsEn: 'Lines about what remains after the fire...\nAshes in the wind, but I\'m still here.',
-                downloads: 1240,
-                audioSrc: null
-            }, {
-                id: 2,
-                title: 'Северный мотив',
-                titleEn: 'Northern Motif',
-                category: 'pop-rap',
-                cover: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="%231a1a25" width="200" height="200"/><text x="100" y="108" text-anchor="middle" fill="%232d4a6b" font-size="20" font-family="sans-serif">❄️</text></svg>',
-                desc: 'Совместный трек с Northern Motif. Холодный саунд, тёплый припев.',
-                descEn: 'Collab track with Northern Motif. Cold sound, warm chorus.',
-                lyrics: 'Северный ветер несёт моё имя...\nСквозь снега и города.',
-                lyricsEn: 'Northern wind carries my name...\nThrough snow and cities.',
-                downloads: 890,
-                audioSrc: null
-            }, {
-                id: 3,
-                title: 'За наших',
-                titleEn: 'For Ours',
-                category: 'thematic',
-                cover: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="%231a1a25" width="200" height="200"/><text x="100" y="108" text-anchor="middle" fill="%235f2733" font-size="20" font-family="sans-serif">⚔️</text></svg>',
-                desc: 'Тематический трек, посвящённый мужеству и стойкости.',
-                descEn: 'Thematic track dedicated to courage and resilience.',
-                lyrics: 'Мы стоим за наших, за правду и свет...\nЭта земля помнит каждый след.',
-                lyricsEn: 'We stand for ours, for truth and light...\nThis land remembers every footprint.',
-                downloads: 2100,
-                audioSrc: null
-            }, {
-                id: 4,
-                title: 'Тишина',
-                titleEn: 'Silence',
-                category: 'pop-rap',
-                cover: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="%231a1a25" width="200" height="200"/><text x="100" y="108" text-anchor="middle" fill="%239ca3af" font-size="20" font-family="sans-serif">🌫️</text></svg>',
-                desc: 'Лиричный трек о моментах, когда слова не нужны.',
-                descEn: 'Lyrical track about moments when words are unnecessary.',
-                lyrics: 'Тишина говорит громче слов...\nВ ней ответы на все вопросы.',
-                lyricsEn: 'Silence speaks louder than words...\nIn it, answers to all questions.',
-                downloads: 670,
-                audioSrc: null
-            }, {
-                id: 5,
-                title: 'Марш',
-                titleEn: 'March',
-                category: 'thematic',
-                cover: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="%231a1a25" width="200" height="200"/><text x="100" y="108" text-anchor="middle" fill="%233b6090" font-size="20" font-family="sans-serif">🥁</text></svg>',
-                desc: 'Ритмичный, маршевый трек с мощным посылом.',
-                descEn: 'Rhythmic march-style track with a powerful message.',
-                lyrics: 'Шаг за шагом, вперёд и только вперёд...\nРитм сердца совпадает с ритмом дороги.',
-                lyricsEn: 'Step by step, forward and only forward...\nHeartbeat matches the rhythm of the road.',
-                downloads: 1560,
-                audioSrc: null
-            }, {
-                id: 6,
-                title: 'Эхо',
-                titleEn: 'Echo',
-                category: 'pop-rap',
-                cover: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="%231a1a25" width="200" height="200"/><text x="100" y="108" text-anchor="middle" fill="%238b3a4a" font-size="20" font-family="sans-serif">🔊</text></svg>',
-                desc: 'Экспериментальный трек с элементами индастриала.',
-                descEn: 'Experimental track with industrial elements.',
-                lyrics: 'Эхо разносится по пустым коридорам...\nКаждое слово возвращается ко мне.',
-                lyricsEn: 'Echo spreads through empty corridors...\nEvery word comes back to me.',
-                downloads: 430,
-                audioSrc: null
-            }];
+           // ============ MUSIC DATA ============
+            const tracksData = [
+                {
+                    id: 1, // Уникальный номер трека
+                    title: 'Запятая у окна', // Название на русском
+                    titleEn: 'Comma by the Window', // Название на английском
+                    category: 'pop-rap', // Категория (для фильтров, если они есть)
+                    cover: 'запятая у окна.jpg', // Имя файла твоей обложки, которую ты загрузил
+                    desc: 'Сингл в стиле синт-поп.', // Короткое описание на русском
+                    descEn: 'Synth-pop single.', // Короткое описание на английском
+                    lyrics: 'Здесь может быть текст твоей певпсни...\nИли пара строк.',
+                    lyricsEn: 'Lyrics can go here...',
+                    downloads: 0,
+                    audioSrc: null // Сюда потом можно вставить ссылку на mp3-файл, если захочешь чтобы он реально играл
+                },
+                // Если есть еще трек, добавляешь запятую и копируешь блок выше, 
+                // меняя id на 2, название, cover и т.д.
+            ];
 
             let currentTrackIndex = -1;
             let isPlaying = false;
