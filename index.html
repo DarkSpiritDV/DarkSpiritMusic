@@ -1395,6 +1395,69 @@ if (heroPlayBtn) {
         } else {
             console.warn('playTrackById не найдена');
 
+            // === ПЕРЕКЛЮЧЕНИЕ ЯЗЫКА ===
+let currentLanguage = localStorage.getItem('language') || 'ru';
+
+function updateLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('language', lang);
+    
+    // 1. Меняем текст у элементов с data-ru / data-en
+    document.querySelectorAll('[data-ru][data-en]').forEach(el => {
+        const text = lang === 'ru' ? el.getAttribute('data-ru') : el.getAttribute('data-en');
+        if (text) el.innerText = text;
+    });
+    
+    // 2. Обновляем заголовки треков в каталоге (перерисовываем)
+    if (typeof renderMusic === 'function') {
+        renderMusic();
+    } else if (typeof renderMusicCatalog === 'function') {
+        renderMusicCatalog();
+    } else {
+        // Если функция отрисовки называется иначе – пропишите её имя
+        // Либо обновляем вручную:
+        const musicGrid = document.getElementById('musicGrid');
+        if (musicGrid && typeof tracksData !== 'undefined') {
+            musicGrid.innerHTML = tracksData.map(t => `
+                <div class="track-card">
+                    <img class="track-cover" src="${t.cover || ''}" onerror="this.src='data:image/svg+xml,%3Csvg%3E'">
+                    <div class="track-title">${lang === 'ru' ? t.title : t.titleEn}</div>
+                    <div class="track-meta">DarkSpirit</div>
+                    <button class="btn-sm btn-primary" onclick="window.playTrackById(${t.id})">▶ ${lang === 'ru' ? 'Слушать' : 'Play'}</button>
+                    <div class="dl-count">📥 ${t.downloads}</div>
+                </div>
+            `).join('');
+        }
+    }
+    
+    // 3. Обновляем название трека в плеере, если он загружен
+    const playerTrackSpan = document.getElementById('playerTrack');
+    if (playerTrackSpan && typeof currentTrackIndex !== 'undefined' && tracksData[currentTrackIndex]) {
+        const track = tracksData[currentTrackIndex];
+        playerTrackSpan.innerText = lang === 'ru' ? track.title : track.titleEn;
+    }
+    
+    // 4. Меняем активный класс у кнопок
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        if (btn.dataset.lang === lang) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+// Навешиваем обработчики на кнопки языка
+document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const lang = btn.dataset.lang;
+        if (lang) updateLanguage(lang);
+    });
+});
+
+// Запускаем язык по сохранённому значению при загрузке
+updateLanguage(currentLanguage);
+
             // === Анимация счётчиков в блоке героя ===
 function startCounters() {
     const counters = [
