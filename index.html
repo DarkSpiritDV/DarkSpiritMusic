@@ -1424,23 +1424,23 @@ margin-bottom: 0.4rem;
 
             document.querySelectorAll('.stat-number').forEach(el => counterObserver.observe(el));
 
-           // ============ MUSIC DATA ============
+          // ============ MUSIC DATA ============
             const tracksData = [
                 {
-                    id: 1, // Уникальный номер трека
-                    title: 'Запятая у окна', // Название на русском
-                    titleEn: 'Comma by the Window', // Название на английском
-                    category: 'pop-rap', // Категория (для фильтров, если они есть)
-                    cover: 'Запятая у окна.png', // Имя файла твоей обложки, которую ты загрузил
-                    desc: 'Сингл в стиле синт-поп.', // Короткое описание на русском
-                    descEn: 'Synth-pop single.', // Короткое описание на английском
+                    id: 1, 
+                    title: 'Запятая у окна', 
+                    titleEn: 'Comma by the Window', 
+                    category: 'pop-rap', 
+                    cover: 'Запятая у окна.png', 
+                    desc: 'Сингл в стиле синт-поп.', 
+                    descEn: 'Synth-pop single.', 
+                    // Обрати внимание: в английском тексте я экранировал кавычки с помощью бэкслеша (\')
                     lyrics: 'Все по двое, я одна Как запятая у окна Мне бы найти того, что прочтет эти строки По глазам в глаза, напрямик без границ, Все по двое, жду с кем я маску сниму С кем можно просто быть собой и в тишине уйти не одной...\nИли пара строк.',
-                    lyricsEn: 'Everyone's in pairs, I'm alone Like a comma by the window I wish I could find someone who would read these lines Eye to eye, without any boundaries Everyone's in pairs, waiting for someone to take off their mask With someone I can just be myself and leave in silence...',
+                    lyricsEn: 'Everyone\'s in pairs, I\'m alone Like a comma by the window I wish I could find someone who would read these lines Eye to eye, without any boundaries Everyone\'s in pairs, waiting for someone to take off their mask With someone I can just be myself and leave in silence...',
                     downloads: 0,
                     audioSrc: 'Запятая у окна.mp3'
                 },
-                // Если есть еще трек, добавляешь запятую и копируешь блок выше, 
-                // меняя id на 2, название, cover и т.д.
+                // Если есть еще трек, добавляешь запятую и копируешь блок выше
             ];
 
             let currentTrackIndex = -1;
@@ -1734,6 +1734,29 @@ margin-bottom: 0.4rem;
                     'Request sent! We will contact you shortly.');
                 this.reset();
             });
+
+            // ============ PLAY LATEST RELEASE BUTTON ============
+            const playLatestBtn = document.getElementById('playLatestBtn');
+            if (playLatestBtn) {
+                playLatestBtn.addEventListener('click', (e) => {
+                    e.preventDefault(); // Останавливаем стандартный переход по ссылке
+                    const latestTrackIndex = 0; 
+                    
+                    if (currentTrackIndex !== latestTrackIndex) {
+                        loadTrack(latestTrackIndex);
+                    }
+                    
+                    if (!isPlaying) {
+                        togglePlay();
+                    }
+                    
+                    // Плавная прокрутка к плееру
+                    const playerWrapper = document.getElementById('playerWrapper');
+                    if(playerWrapper) {
+                        playerWrapper.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            }
 
             // ============ INITIAL LOAD ============
             // Trigger counter animation if hero is visible on load
