@@ -199,16 +199,16 @@
     <section id="support">...</section>
     <footer class="footer">...</footer>
 
-   <script>
+  <script>
     (function() {
-        // === ДАННЫЕ ТРЕКОВ ===
+        // ==================== ДАННЫЕ ТРЕКОВ ====================
         const tracksData = [
-            { id:1, title:'Запятая у окна (фрагмент)', titleEn:'Comma by the Window (fragment)', category:'pop-rap', cover:'Запятая у окна.png', audioSrc:'zapyataya.mp3', downloads:4, likes:3 },
-            { id:2, title:'Soul and Stream (фрагмент)', titleEn:'Soul and Stream (fragment)', category:'pop-rap', cover:'Soul and Stream.jpg', audioSrc:'SoulandStream.mp3', downloads:2, likes:6 },
-            { id:3, title:'Пробки заебали (фрагмент)', titleEn:'Traffic Jams (fragment)', category:'thematic', cover:'Пробки заебали.png', audioSrc:'Probki.mp3', downloads:8, likes:10 }
+            { id:1, title:'Запятая у окна (фрагмент)', titleEn:'Comma by the Window (fragment)', category:'pop-rap', cover:'Запятая у окна.png', audioSrc:'zapyataya.mp3', downloads:4, likes:3, userLiked: false },
+            { id:2, title:'Soul and Stream (фрагмент)', titleEn:'Soul and Stream (fragment)', category:'pop-rap', cover:'Soul and Stream.jpg', audioSrc:'SoulandStream.mp3', downloads:2, likes:6, userLiked: false },
+            { id:3, title:'Пробки заебали (фрагмент)', titleEn:'Traffic Jams (fragment)', category:'thematic', cover:'Пробки заебали.png', audioSrc:'Probki.mp3', downloads:8, likes:10, userLiked: false }
         ];
 
-        // === ЭЛЕМЕНТЫ ПЛЕЕРА ===
+        // ==================== ЭЛЕМЕНТЫ ПЛЕЕРА ====================
         const audio = document.getElementById('audioElement');
         const playBtn = document.getElementById('playerPlay');
         const prevBtn = document.getElementById('playerPrev');
@@ -219,13 +219,15 @@
         const trackNameSpan = document.getElementById('playerTrack');
         const coverImg = document.getElementById('playerCover');
         const volumeSlider = document.getElementById('volumeSlider');
+        const musicGrid = document.getElementById('musicGrid');
 
         let currentIndex = 0;
         let isPlaying = false;
 
+        // ==================== ФУНКЦИИ ПЛЕЕРА ====================
         function loadTrack(index) {
             const t = tracksData[index];
-            if(!t) return;
+            if (!t) return;
             audio.src = t.audioSrc;
             audio.load();
             const currentLang = localStorage.getItem('lang') || 'ru';
@@ -236,46 +238,150 @@
         }
 
         function togglePlay() {
-            if(audio.paused) {
-                audio.play().then(() => { isPlaying=true; playBtn.innerText='⏸'; }).catch(e=>console.warn(e));
+            if (audio.paused) {
+                audio.play().then(() => { isPlaying = true; playBtn.innerText = '⏸'; }).catch(e => console.warn(e));
             } else {
                 audio.pause();
-                isPlaying=false;
-                playBtn.innerText='▶';
+                isPlaying = false;
+                playBtn.innerText = '▶';
             }
         }
-        function next() { currentIndex = (currentIndex+1)%tracksData.length; loadTrack(currentIndex); if(isPlaying) audio.play(); }
-        function prev() { currentIndex = (currentIndex-1+tracksData.length)%tracksData.length; loadTrack(currentIndex); if(isPlaying) audio.play(); }
-        function updateProgress() { if(audio.duration) { let per = (audio.currentTime/audio.duration)*100; progressFill.style.width=per+'%'; let mins=Math.floor(audio.currentTime/60), secs=Math.floor(audio.currentTime%60); timeSpan.innerText=mins+':'+(secs<10?'0':'')+secs; } }
-        function setProgress(e) { let rect=progressBg.getBoundingClientRect(), perc=(e.clientX-rect.left)/rect.width; if(audio.duration) audio.currentTime=perc*audio.duration; }
 
+        function next() {
+            currentIndex = (currentIndex + 1) % tracksData.length;
+            loadTrack(currentIndex);
+            if (isPlaying) audio.play();
+        }
+
+        function prev() {
+            currentIndex = (currentIndex - 1 + tracksData.length) % tracksData.length;
+            loadTrack(currentIndex);
+            if (isPlaying) audio.play();
+        }
+
+        function updateProgress() {
+            if (audio.duration && !isNaN(audio.duration)) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressFill.style.width = percent + '%';
+                const mins = Math.floor(audio.currentTime / 60);
+                const secs = Math.floor(audio.currentTime % 60);
+                timeSpan.innerText = mins + ':' + (secs < 10 ? '0' : '') + secs;
+            }
+        }
+
+        function setProgress(e) {
+            const rect = progressBg.getBoundingClientRect();
+            const perc = (e.clientX - rect.left) / rect.width;
+            if (audio.duration) audio.currentTime = perc * audio.duration;
+        }
+
+        // Подписка на события
         playBtn.onclick = togglePlay;
         prevBtn.onclick = prev;
         nextBtn.onclick = next;
         audio.addEventListener('timeupdate', updateProgress);
         audio.addEventListener('ended', next);
         progressBg.addEventListener('click', setProgress);
-        if(volumeSlider) volumeSlider.oninput = (e) => audio.volume = e.target.value;
+        if (volumeSlider) volumeSlider.oninput = (e) => audio.volume = e.target.value;
 
-        // === ОТРИСОВКА СЕТКИ МУЗЫКИ ===
-        const musicGrid = document.getElementById('musicGrid');
-        function renderMusic() {
-            if(!musicGrid) return;
-            const currentLang = localStorage.getItem('lang') || 'ru';
-            musicGrid.innerHTML = tracksData.map(t => `
-                <div class="track-card">
-                    <img class="track-cover" src="${t.cover || ''}" onerror="this.src='data:image/svg+xml,%3Csvg%3E'">
-                    <div class="track-title">${currentLang === 'ru' ? t.title : t.titleEn}</div>
-                    <div class="track-meta">DarkSpirit</div>
-                    <button class="btn-sm btn-primary" onclick="window.playTrackById(${t.id})">▶ ${currentLang === 'ru' ? 'Слушать' : 'Play'}</button>
-                    <div class="dl-count">📥 ${t.downloads}</div>
-                </div>
-            `).join('');
+        // ==================== ЛАЙКИ (ОДИН ПОЛЬЗОВАТЕЛЬ — ОДИН ГОЛОС) ====================
+        function initLikes() {
+            const savedLikes = localStorage.getItem('darkspirit_likes');
+            const savedUserLikes = localStorage.getItem('darkspirit_user_likes');
+
+            if (savedLikes) {
+                const likesMap = JSON.parse(savedLikes);
+                tracksData.forEach(track => {
+                    if (likesMap[track.id] !== undefined) track.likes = likesMap[track.id];
+                    else if (track.likes === undefined) track.likes = 0;
+                });
+            } else {
+                tracksData.forEach(track => { if (track.likes === undefined) track.likes = 0; });
+            }
+
+            if (savedUserLikes) {
+                const userLikesMap = JSON.parse(savedUserLikes);
+                tracksData.forEach(track => { track.userLiked = userLikesMap[track.id] === true; });
+            } else {
+                tracksData.forEach(track => { track.userLiked = false; });
+            }
         }
 
+        function persistLikes() {
+            const likesMap = {};
+            const userLikesMap = {};
+            tracksData.forEach(track => {
+                likesMap[track.id] = track.likes;
+                userLikesMap[track.id] = track.userLiked;
+            });
+            localStorage.setItem('darkspirit_likes', JSON.stringify(likesMap));
+            localStorage.setItem('darkspirit_user_likes', JSON.stringify(userLikesMap));
+        }
+
+        function toggleLike(trackId) {
+            const track = tracksData.find(t => t.id === trackId);
+            if (!track) return;
+            if (track.userLiked) {
+                track.likes = Math.max(0, track.likes - 1);
+                track.userLiked = false;
+            } else {
+                track.likes += 1;
+                track.userLiked = true;
+            }
+            persistLikes();
+            renderMusic(); // перерисовка каталога
+        }
+
+        // ==================== ОТРИСОВКА КАТАЛОГА С ЛАЙКАМИ ====================
+        function renderMusic() {
+            if (!musicGrid) return;
+            const currentLang = localStorage.getItem('lang') || 'ru';
+            musicGrid.innerHTML = tracksData.map(t => {
+                const likedClass = t.userLiked ? 'liked' : '';
+                const heartIcon = t.userLiked ? '❤️' : '♡';
+                return `
+                    <div class="track-card">
+                        <img class="track-cover" src="${t.cover || ''}" onerror="this.src='data:image/svg+xml,%3Csvg%3E'">
+                        <div class="track-title">${currentLang === 'ru' ? t.title : t.titleEn}</div>
+                        <div class="track-meta">DarkSpirit</div>
+                        <div class="track-actions">
+                            <button class="btn-sm btn-primary play-track-btn" data-id="${t.id}">▶ ${currentLang === 'ru' ? 'Слушать' : 'Play'}</button>
+                            <button class="like-btn ${likedClass}" data-id="${t.id}">${heartIcon}</button>
+                            <span class="likes-count" data-id="${t.id}">${t.likes}</span>
+                        </div>
+                        <div class="dl-count">📥 ${t.downloads}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Обработчики для кнопок "Слушать"
+            document.querySelectorAll('.play-track-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = parseInt(btn.dataset.id);
+                    window.playTrackById(id);
+                });
+            });
+
+            // Обработчики для кнопок лайков
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = parseInt(btn.dataset.id);
+                    toggleLike(id);
+                });
+            });
+        }
+
+        // ==================== ФУНКЦИЯ ВОСПРОИЗВЕДЕНИЯ ПО ID С ПАУЗОЙ ====================
         window.playTrackById = function(id) {
-            let idx = tracksData.findIndex(t => t.id === id);
-            if(idx !== -1) {
+            const idx = tracksData.findIndex(t => t.id === id);
+            if (idx === -1) return;
+            if (currentIndex === idx && !audio.paused) {
+                audio.pause();
+                isPlaying = false;
+                playBtn.innerText = '▶';
+            } else {
                 currentIndex = idx;
                 loadTrack(currentIndex);
                 audio.play().then(() => {
@@ -284,30 +390,33 @@
                 }).catch(e => console.warn(e));
             }
         };
-        renderMusic();
 
-        // === ПРИНУДИТЕЛЬНОЕ ОТОБРАЖЕНИЕ СЕКЦИЙ ===
+        // Синхронизация кнопки плеера по окончании трека
+        audio.addEventListener('ended', () => {
+            isPlaying = false;
+            playBtn.innerText = '▶';
+        });
+
+        // ==================== ПРИНУДИТЕЛЬНОЕ ОТОБРАЖЕНИЕ СЕКЦИЙ ====================
         document.querySelectorAll('.fade-in-up, .fade-in').forEach(el => {
             el.classList.add('visible');
             el.style.opacity = '1';
             el.style.transform = 'translateY(0)';
         });
 
-        // === ЗАГРУЗКА ПЕРВОГО ТРЕКА ===
-        if(tracksData.length) loadTrack(0);
+        // ==================== ЗАГРУЗКА ПЕРВОГО ТРЕКА ====================
+        if (tracksData.length) loadTrack(0);
 
-        // === КНОПКА "СЛУШАТЬ СВЕЖИЙ РЕЛИЗ" (запускает трек с id=1) ===
+        // ==================== КНОПКА "СЛУШАТЬ СВЕЖИЙ РЕЛИЗ" ====================
         const heroPlayBtn = document.querySelector('.hero .btn-primary');
         if (heroPlayBtn) {
             heroPlayBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                if (typeof window.playTrackById === 'function') {
-                    window.playTrackById(1);
-                }
+                window.playTrackById(1);
             });
         }
 
-        // === АНИМАЦИЯ СЧЁТЧИКОВ ===
+        // ==================== АНИМАЦИЯ СЧЁТЧИКОВ ====================
         function startCounters() {
             const counters = [
                 { element: document.getElementById('statPlatforms'), target: 30, suffix: '+' },
@@ -329,6 +438,7 @@
                 }, 30);
             });
         }
+
         const heroStats = document.querySelector('.hero-stats');
         if (heroStats) {
             const observer = new IntersectionObserver((entries) => {
@@ -342,30 +452,7 @@
             observer.observe(heroStats);
         }
 
-        // --- Доработка: кнопка "Слушать" включает/ставит на паузу текущий трек ---
-        const originalPlayTrackById = window.playTrackById;
-        window.playTrackById = function(id) {
-            let idx = tracksData.findIndex(t => t.id === id);
-            if (idx === -1) return;
-            if (currentIndex === idx && !audio.paused) {
-                audio.pause();
-                isPlaying = false;
-                playBtn.innerText = '▶';
-            } else {
-                currentIndex = idx;
-                loadTrack(currentIndex);
-                audio.play().then(() => {
-                    isPlaying = true;
-                    playBtn.innerText = '⏸';
-                }).catch(e => console.warn(e));
-            }
-        };
-        audio.addEventListener('ended', function() {
-            isPlaying = false;
-            playBtn.innerText = '▶';
-        });
-
-        // === МОБИЛЬНОЕ МЕНЮ (БУРГЕР) ===
+        // ==================== МОБИЛЬНОЕ МЕНЮ (БУРГЕР) ====================
         const mobileToggle = document.getElementById('mobileMenuToggle');
         const navMenu = document.getElementById('nav');
         if (mobileToggle && navMenu) {
@@ -374,9 +461,7 @@
                 navMenu.classList.toggle('open');
             });
             navMenu.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', () => {
-                    navMenu.classList.remove('open');
-                });
+                link.addEventListener('click', () => navMenu.classList.remove('open'));
             });
             document.addEventListener('click', (e) => {
                 if (navMenu.classList.contains('open') && !navMenu.contains(e.target) && !mobileToggle.contains(e.target)) {
@@ -385,40 +470,36 @@
             });
         }
 
-        // === ПЕРЕКЛЮЧЕНИЕ ЯЗЫКА (RU / EN) ===
+        // ==================== ПЕРЕКЛЮЧЕНИЕ ЯЗЫКА ====================
         let currentLang = localStorage.getItem('lang') || 'ru';
         function setLanguage(lang) {
             currentLang = lang;
             localStorage.setItem('lang', lang);
-            
             document.querySelectorAll('[data-ru][data-en]').forEach(el => {
                 const text = lang === 'ru' ? el.getAttribute('data-ru') : el.getAttribute('data-en');
                 if (text) el.innerText = text;
             });
-            
             document.querySelectorAll('.lang-btn').forEach(btn => {
-                if (btn.dataset.lang === lang) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+                if (btn.dataset.lang === lang) btn.classList.add('active');
+                else btn.classList.remove('active');
             });
-            
             if (tracksData[currentIndex]) {
                 trackNameSpan.innerText = lang === 'ru' ? tracksData[currentIndex].title : tracksData[currentIndex].titleEn;
             }
-            
-            renderMusic(); // перерисовываем каталог
+            renderMusic(); // обновить названия треков в каталоге
         }
-        
+
         document.querySelectorAll('.lang-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const lang = btn.dataset.lang;
                 if (lang) setLanguage(lang);
             });
         });
-        
         setLanguage(currentLang);
+
+        // ==================== ИНИЦИАЛИЗАЦИЯ ЛАЙКОВ И ОТРИСОВКА ====================
+        initLikes();
+        renderMusic();
     })();
 </script>
 </body>
