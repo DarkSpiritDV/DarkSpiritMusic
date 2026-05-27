@@ -153,7 +153,6 @@
         .like-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #aaa; transition: 0.1s; padding: 0 0.2rem; }
         .like-btn.liked { color: #e85d75; }
         .likes-count { font-size: 0.8rem; color: #aaa; margin-left: 0.2rem; min-width: 28px; display: inline-block; }
-        .dl-count { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.3rem; }
 
         .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
         .video-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; }
@@ -341,11 +340,11 @@
 
     <script>
         (function() {
-            // === ДАННЫЕ ТРЕКОВ (с лайками) ===
+            // === ДАННЫЕ ТРЕКОВ (без скачиваний) ===
             const tracksData = [
-                { id:1, title:'Запятая у окна (фрагмент)', titleEn:'Comma by the Window (fragment)', category:'pop-rap', cover:'Запятая у окна.png', audioSrc:'zapyataya.mp3', downloads:4, likes:3, userLiked: false },
-                { id:2, title:'Soul and Stream (фрагмент)', titleEn:'Soul and Stream (fragment)', category:'pop-rap', cover:'Soul and Stream.jpg', audioSrc:'SoulandStream.mp3', downloads:2, likes:6, userLiked: false },
-                { id:3, title:'Пробки заебали (фрагмент)', titleEn:'Traffic Jams (fragment)', category:'thematic', cover:'Пробки заебали.png', audioSrc:'Probki.mp3', downloads:8, likes:10, userLiked: false }
+                { id:1, title:'Запятая у окна (фрагмент)', titleEn:'Comma by the Window (fragment)', category:'pop-rap', cover:'Запятая у окна.png', audioSrc:'zapyataya.mp3', likes:3, userLiked: false },
+                { id:2, title:'Soul and Stream (фрагмент)', titleEn:'Soul and Stream (fragment)', category:'pop-rap', cover:'Soul and Stream.jpg', audioSrc:'SoulandStream.mp3', likes:6, userLiked: false },
+                { id:3, title:'Пробки заебали (фрагмент)', titleEn:'Traffic Jams (fragment)', category:'thematic', cover:'Пробки заебали.png', audioSrc:'Probki.mp3', likes:10, userLiked: false }
             ];
 
             // === ЭЛЕМЕНТЫ ПЛЕЕРА ===
@@ -364,7 +363,6 @@
             let currentIndex = 0;
             let isPlaying = false;
 
-            // === ФУНКЦИИ ПЛЕЕРА ===
             function loadTrack(index) {
                 const t = tracksData[index];
                 if(!t) return;
@@ -399,7 +397,7 @@
             progressBg.addEventListener('click', setProgress);
             if(volumeSlider) volumeSlider.oninput = (e) => audio.volume = e.target.value;
 
-            // === ЛАЙКИ (LOCALSTORAGE) ===
+            // === ЛАЙКИ ===
             function initLikes() {
                 const savedLikes = localStorage.getItem('darkspirit_likes');
                 const savedUserLikes = localStorage.getItem('darkspirit_user_likes');
@@ -433,10 +431,10 @@
                     track.userLiked = true;
                 }
                 persistLikes();
-                renderMusic(); // перерисовка
+                renderMusic();
             }
 
-            // === ОТРИСОВКА КАТАЛОГА ===
+            // === ОТРИСОВКА КАТАЛОГА (без счётчика скачиваний) ===
             function renderMusic() {
                 if (!musicGrid) return;
                 const currentLang = localStorage.getItem('lang') || 'ru';
@@ -453,7 +451,6 @@
                                 <button class="like-btn ${likedClass}" data-id="${t.id}">${heartIcon}</button>
                                 <span class="likes-count" data-id="${t.id}">${t.likes}</span>
                             </div>
-                            <div class="dl-count">📥 ${t.downloads}</div>
                         </div>
                     `;
                 }).join('');
@@ -474,7 +471,6 @@
                 });
             }
 
-            // === УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ВОСПРОИЗВЕДЕНИЯ (Play/Pause для текущего) ===
             window.playTrackById = function(id) {
                 let idx = tracksData.findIndex(t => t.id === id);
                 if (idx === -1) return;
@@ -499,10 +495,8 @@
                 el.style.transform = 'translateY(0)';
             });
 
-            // === ЗАГРУЗКА ПЕРВОГО ТРЕКА ===
             if (tracksData.length) loadTrack(0);
 
-            // === КНОПКА "СЛУШАТЬ СВЕЖИЙ РЕЛИЗ" ===
             const heroPlayBtn = document.querySelector('.hero .btn-primary');
             if (heroPlayBtn) {
                 heroPlayBtn.addEventListener('click', (e) => {
@@ -511,7 +505,7 @@
                 });
             }
 
-            // === АНИМАЦИЯ СЧЁТЧИКОВ ===
+            // === СЧЁТЧИКИ СТАТИСТИКИ ===
             function startCounters() {
                 const counters = [
                     { element: document.getElementById('statPlatforms'), target: 30, suffix: '+' },
@@ -585,7 +579,6 @@
             });
             setLanguage(currentLang);
 
-            // === ИНИЦИАЛИЗАЦИЯ ЛАЙКОВ И ОТРИСОВКА ===
             initLikes();
             renderMusic();
         })();
