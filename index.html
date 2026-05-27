@@ -1379,6 +1379,18 @@ margin-bottom: 0.4rem;
 
         // === ЗАГРУЗКА ПЕРВОГО ТРЕКА ===
         if(tracksData.length) loadTrack(0);
+        // Кнопка "Слушать свежий релиз" запускает трек id = 1
+const heroPlayBtn = document.querySelector('.hero .btn-primary');
+if (heroPlayBtn) {
+    heroPlayBtn.addEventListener('click', (e) => {
+        e.preventDefault();             // отменяем переход по якорю #music
+        if (typeof window.playTrackById === 'function') {
+            window.playTrackById(1);     // запускаем трек с id=1
+        } else {
+            console.warn('playTrackById не найдена');
+        }
+    });
+}
     })();
 </script>
 </body>
