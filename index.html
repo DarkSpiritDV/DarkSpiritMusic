@@ -141,9 +141,42 @@
         .music-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.4rem; }
         .track-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1rem; text-align: center; transition: all var(--transition-smooth); position: relative; }
         .track-card:hover { border-color: var(--border-mid); box-shadow: var(--shadow-card); transform: translateY(-4px); }
+        /* Уменьшенный шрифт названий треков */
+        .track-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.15rem;
+            white-space: normal;
+            line-height: 1.3;
+        }
         .track-cover { width: 100%; aspect-ratio: 1; border-radius: var(--radius-md); object-fit: cover; margin-bottom: 0.8rem; background: var(--bg-elevated); }
-        .track-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .track-meta { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.7rem; }
+
+        /* Камуфляжный фон для карточек категории "thematic" */
+        .track-card.camouflage {
+            background: repeating-linear-gradient(45deg, 
+                #4e5a2b, 
+                #4e5a2b 30px, 
+                #2b3318 30px, 
+                #2b3318 60px);
+            border-color: #8bb56a;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+        .track-card.camouflage::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: inherit;
+            pointer-events: none;
+        }
+        .track-card.camouflage * {
+            position: relative;
+            z-index: 1;
+        }
 
         .btn-wrapper { position: relative; display: inline-block; margin: 0 auto; }
         .progress-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% + 6px); height: calc(100% + 6px); pointer-events: none; }
@@ -342,14 +375,14 @@
     <script>
         (function() {
             // === ДАННЫЕ ТРЕКОВ (с категориями) ===
-          const tracksData = [
-    { id:1, title:'Запятая у окна (фрагмент)', titleEn:'Comma by the Window (fragment)', category:'pop-rap', cover:'Запятая у окна.png', audioSrc:'zapyataya.mp3', likes:3, userLiked: false },
-    { id:2, title:'Soul and Stream (фрагмент)', titleEn:'Soul and Stream (fragment)', category:'pop-rap', cover:'Soul and Stream.jpg', audioSrc:'SoulandStream.mp3', likes:6, userLiked: false },
-    { id:3, title:'Пробки заебали (фрагмент)', titleEn:'Traffic Jams (fragment)', category:'pop-rap', cover:'Пробки заебали.png', audioSrc:'Probki.mp3', likes:10, userLiked: false },
-    { id:4, title:"Путь офицера (Посвящается брату)", titleEn:"The Officer's Path (Dedicated to My Brother)", category:"thematic", cover:"малой.jpg", audioSrc:"Putoficera.mp3", likes:4, userLiked: false },
-    { id:5, title:"Медики под огнём (фрагмент)", titleEn:"Medical Personnel in War (fragment)", category:"thematic", cover:"медики под огнём.jpg", audioSrc:"Medikipodognem.mp3", likes:6, userLiked: false },
-    { id:6, title:"Мать земля (фрагмент)", titleEn:"Mother Earth (fragment)", category:"thematic", cover:"мать земля.jpg", audioSrc:"matzemlia.mp3", likes:8, userLiked: false }
-];
+            const tracksData = [
+                { id:1, title:'Запятая у окна (фрагмент)', titleEn:'Comma by the Window (fragment)', category:'pop-rap', cover:'Запятая у окна.png', audioSrc:'zapyataya.mp3', likes:3, userLiked: false },
+                { id:2, title:'Soul and Stream (фрагмент)', titleEn:'Soul and Stream (fragment)', category:'pop-rap', cover:'Soul and Stream.jpg', audioSrc:'SoulandStream.mp3', likes:6, userLiked: false },
+                { id:3, title:'Пробки заебали (фрагмент)', titleEn:'Traffic Jams (fragment)', category:'pop-rap', cover:'Пробки заебали.png', audioSrc:'Probki.mp3', likes:10, userLiked: false },
+                { id:4, title:"Путь офицера (Посвящается брату)", titleEn:"The Officer's Path (Dedicated to My Brother)", category:"thematic", cover:"малой.jpg", audioSrc:"Putoficera.mp3", likes:4, userLiked: false },
+                { id:5, title:"Медики под огнём (фрагмент)", titleEn:"Medical Personnel in War (fragment)", category:"thematic", cover:"медики под огнём.jpg", audioSrc:"Medikipodognem.mp3", likes:6, userLiked: false },
+                { id:6, title:"Мать земля (фрагмент)", titleEn:"Mother Earth (fragment)", category:"thematic", cover:"мать земля.jpg", audioSrc:"matzemlia.mp3", likes:8, userLiked: false }
+            ];
 
             // === ЭЛЕМЕНТЫ ПЛЕЕРА ===
             const audio = document.getElementById('audioElement');
@@ -521,7 +554,7 @@
                 renderMusic();
             }
 
-            // === ОТРИСОВКА КАТАЛОГА С УЧЁТОМ КАТЕГОРИИ ===
+            // === ОТРИСОВКА КАТАЛОГА С УЧЁТОМ КАТЕГОРИИ И КАМУФЛЯЖА ===
             function renderMusic() {
                 if (!musicGrid) return;
                 const currentLang = localStorage.getItem('lang') || 'ru';
@@ -535,8 +568,10 @@
                     musicGrid.innerHTML = filteredTracks.map(t => {
                         const likedClass = t.userLiked ? 'liked' : '';
                         const heartIcon = t.userLiked ? '❤️' : '♡';
+                        // Добавляем класс 'camouflage' если категория 'thematic'
+                        const cardClass = t.category === 'thematic' ? 'track-card camouflage' : 'track-card';
                         return `
-                            <div class="track-card">
+                            <div class="${cardClass}">
                                 <img class="track-cover" src="${t.cover || ''}" onerror="this.src='data:image/svg+xml,%3Csvg%3E'">
                                 <div class="track-title">${currentLang === 'ru' ? t.title : t.titleEn}</div>
                                 <div class="track-meta">DarkSpirit</div>
