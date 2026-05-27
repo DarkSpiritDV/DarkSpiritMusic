@@ -1293,345 +1293,91 @@ margin-bottom: 0.4rem;
         </div>
     </footer>
 
-   <script>
+  <script>
     (function() {
-        // ======================= ДАННЫЕ ТРЕКОВ =======================
+        // === ДАННЫЕ ТРЕКОВ (добавьте свои) ===
         const tracksData = [
-            {
-                id: 1,
-                title: 'Запятая у окна',
-                titleEn: 'Comma by the Window',
-                category: 'pop-rap',
-                cover: 'Запятая у окна.png',
-                desc: 'Сингл в стиле синт-поп.',
-                descEn: 'Synth-pop single.',
-                lyrics: 'Все по двое, ты и я — как запятая у окна...',
-                lyricsEn: 'Everyone in pairs, you and me like a comma by the window...',
-                audioSrc: 'zapyataya.mp3',   // Убедитесь, что файл существует
-                downloads: 124,
-                likes: 35
-            },
-            {
-                id: 2,
-                title: 'Пепел',
-                titleEn: 'Ashes',
-                category: 'thematic',
-                cover: 'pepel.png',
-                desc: 'Главный трек альбома.',
-                descEn: 'Main track of the album.',
-                lyrics: 'Пепел стучит в моём сердце...',
-                lyricsEn: 'Ashes are knocking in my heart...',
-                audioSrc: 'pepel.mp3',
-                downloads: 312,
-                likes: 87
-            },
-            {
-                id: 3,
-                title: 'Северный мотив',
-                titleEn: 'Northern Motif',
-                category: 'thematic',
-                cover: 'north.png',
-                desc: 'Коллаборация с Северным мотивом.',
-                descEn: 'Collab with Northern Motif.',
-                lyrics: 'Холодный ветер гонит нас...',
-                lyricsEn: 'Cold wind drives us...',
-                audioSrc: 'north_motif.mp3',
-                downloads: 98,
-                likes: 42
-            },
-            {
-                id: 4,
-                title: 'Спокойная дерзость',
-                titleEn: 'Calm Boldness',
-                category: 'pop-rap',
-                cover: 'calm.png',
-                desc: 'Атмосферный трек.',
-                descEn: 'Atmospheric track.',
-                lyrics: 'Я иду по краю, но не падаю...',
-                lyricsEn: 'I walk on the edge but do not fall...',
-                audioSrc: 'calm_boldness.mp3',
-                downloads: 203,
-                likes: 61
-            }
+            { id:1, title:'Запятая у окна', titleEn:'Comma by the Window', category:'pop-rap', cover:'Запятая у окна.png', audioSrc:'zapyataya.mp3', downloads:124, likes:35 },
+            { id:2, title:'Пепел', titleEn:'Ashes', category:'thematic', cover:'pepel.png', audioSrc:'pepel.mp3', downloads:312, likes:87 }
         ];
 
-        // DOM элементы плеера
+        // === ЭЛЕМЕНТЫ ПЛЕЕРА ===
         const audio = document.getElementById('audioElement');
-        const playerPlay = document.getElementById('playerPlay');
-        const playerPrev = document.getElementById('playerPrev');
-        const playerNext = document.getElementById('playerNext');
-        const progressBarFill = document.getElementById('progressBarFill');
-        const progressBarBg = document.getElementById('progressBarBg');
-        const timeDisplay = document.getElementById('timeDisplay');
-        const playerTrackSpan = document.getElementById('playerTrack');
-        const playerArtistSpan = document.querySelector('.player-artist');
-        const playerCoverImg = document.getElementById('playerCover');
+        const playBtn = document.getElementById('playerPlay');
+        const prevBtn = document.getElementById('playerPrev');
+        const nextBtn = document.getElementById('playerNext');
+        const progressFill = document.getElementById('progressBarFill');
+        const progressBg = document.getElementById('progressBarBg');
+        const timeSpan = document.getElementById('timeDisplay');
+        const trackNameSpan = document.getElementById('playerTrack');
+        const coverImg = document.getElementById('playerCover');
         const volumeSlider = document.getElementById('volumeSlider');
 
-        // Состояние плеера
-        let currentTrackIndex = 0;
+        let currentIndex = 0;
         let isPlaying = false;
-        let currentLanguage = 'ru'; // ru или en
 
-        // Функция загрузки трека
         function loadTrack(index) {
-            if (!tracksData[index]) return;
-            const track = tracksData[index];
-            audio.src = track.audioSrc;
+            const t = tracksData[index];
+            if(!t) return;
+            audio.src = t.audioSrc;
             audio.load();
-            updatePlayerUI(track);
-            // Сброс прогресса
-            progressBarFill.style.width = '0%';
-            timeDisplay.textContent = '0:00';
-            // Если плеер был в режиме воспроизведения – продолжить
-            if (isPlaying) {
-                audio.play().catch(e => console.warn('Автовоспроизведение заблокировано:', e));
-            }
+            trackNameSpan.innerText = t.title;
+            coverImg.src = t.cover || 'data:image/svg+xml,%3Csvg%3E...';
+            progressFill.style.width = '0%';
+            timeSpan.innerText = '0:00';
         }
 
-        // Обновление информации в плеере
-        function updatePlayerUI(track) {
-            const title = currentLanguage === 'ru' ? track.title : track.titleEn;
-            playerTrackSpan.textContent = title;
-            playerArtistSpan.textContent = 'DarkSpirit';
-            // Обложка (если файл существует, иначе заглушка)
-            if (track.cover && track.cover !== '') {
-                playerCoverImg.src = track.cover;
-                playerCoverImg.onerror = () => { playerCoverImg.src = 'data:image/svg+xml,%3Csvg...'; }; // можно оставить старую заглушку
-            } else {
-                playerCoverImg.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%2313131b\' width=\'100\' height=\'100\'/%3E%3Ctext x=\'50\' y=\'58\' text-anchor=\'middle\' fill=\'%236b6972\' font-size=\'14\'%3EDS%3C/text%3E%3C/svg%3E';
-            }
-        }
-
-        // Воспроизведение / пауза
         function togglePlay() {
-            if (audio.paused) {
-                audio.play().then(() => {
-                    isPlaying = true;
-                    playerPlay.textContent = '⏸';
-                }).catch(e => console.error('Ошибка воспроизведения:', e));
+            if(audio.paused) {
+                audio.play().then(() => { isPlaying=true; playBtn.innerText='⏸'; }).catch(e=>console.warn(e));
             } else {
                 audio.pause();
-                isPlaying = false;
-                playerPlay.textContent = '▶';
+                isPlaying=false;
+                playBtn.innerText='▶';
             }
         }
+        function next() { currentIndex = (currentIndex+1)%tracksData.length; loadTrack(currentIndex); if(isPlaying) audio.play(); }
+        function prev() { currentIndex = (currentIndex-1+tracksData.length)%tracksData.length; loadTrack(currentIndex); if(isPlaying) audio.play(); }
+        function updateProgress() { if(audio.duration) { let per = (audio.currentTime/audio.duration)*100; progressFill.style.width=per+'%'; let mins=Math.floor(audio.currentTime/60), secs=Math.floor(audio.currentTime%60); timeSpan.innerText=mins+':'+(secs<10?'0':'')+secs; } }
+        function setProgress(e) { let rect=progressBg.getBoundingClientRect(), perc=(e.clientX-rect.left)/rect.width; if(audio.duration) audio.currentTime=perc*audio.duration; }
 
-        // Следующий трек
-        function nextTrack() {
-            currentTrackIndex = (currentTrackIndex + 1) % tracksData.length;
-            loadTrack(currentTrackIndex);
-            if (isPlaying) {
-                audio.play().catch(e => console.warn(e));
-            }
-        }
+        playBtn.onclick=togglePlay;
+        prevBtn.onclick=prev;
+        nextBtn.onclick=next;
+        audio.addEventListener('timeupdate',updateProgress);
+        audio.addEventListener('ended',next);
+        progressBg.addEventListener('click',setProgress);
+        if(volumeSlider) volumeSlider.oninput=(e)=>audio.volume=e.target.value;
 
-        // Предыдущий трек
-        function prevTrack() {
-            currentTrackIndex = (currentTrackIndex - 1 + tracksData.length) % tracksData.length;
-            loadTrack(currentTrackIndex);
-            if (isPlaying) {
-                audio.play().catch(e => console.warn(e));
-            }
-        }
-
-        // Обновление прогресса и времени
-        function updateProgress() {
-            if (audio.duration && !isNaN(audio.duration)) {
-                const percent = (audio.currentTime / audio.duration) * 100;
-                progressBarFill.style.width = percent + '%';
-                const minutes = Math.floor(audio.currentTime / 60);
-                const seconds = Math.floor(audio.currentTime % 60);
-                timeDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            } else {
-                timeDisplay.textContent = '0:00';
-            }
-        }
-
-        // Установка времени по клику на прогресс-бар
-        function setProgress(e) {
-            const rect = progressBarBg.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const width = rect.width;
-            const percent = clickX / width;
-            if (audio.duration) {
-                audio.currentTime = percent * audio.duration;
-            }
-        }
-
-        // Обработка окончания трека – переключить на следующий
-        function onTrackEnd() {
-            nextTrack();
-        }
-
-        // Громкость
-        if (volumeSlider) {
-            volumeSlider.addEventListener('input', (e) => {
-                audio.volume = parseFloat(e.target.value);
-            });
-            audio.volume = volumeSlider.value;
-        }
-
-        // ======================= ОТРИСОВКА КАТАЛОГА МУЗЫКИ =======================
+        // === ОТРИСОВКА СЕТКИ МУЗЫКИ ===
         const musicGrid = document.getElementById('musicGrid');
-        const tabBtns = document.querySelectorAll('.tab-btn');
-
-        function renderMusicGrid(category = 'all') {
-            if (!musicGrid) return;
-            let filteredTracks = tracksData;
-            if (category !== 'all') {
-                filteredTracks = tracksData.filter(t => t.category === category);
-            }
-            if (filteredTracks.length === 0) {
-                musicGrid.innerHTML = '<div style="grid-column:1/-1; text-align:center;">Нет треков в этой категории</div>';
-                return;
-            }
-
-            musicGrid.innerHTML = filteredTracks.map(track => {
-                const title = currentLanguage === 'ru' ? track.title : track.titleEn;
-                const desc = currentLanguage === 'ru' ? track.desc : track.descEn;
-                return `
-                    <div class="track-card" data-id="${track.id}">
-                        <img class="track-cover" src="${track.cover || 'data:image/svg+xml,...'}" alt="${title}" onerror="this.src='data:image/svg+xml,%3Csvg...%3E'">
-                        <div class="track-title">${title}</div>
-                        <div class="track-meta">DarkSpirit</div>
-                        <div class="track-actions">
-                            <button class="btn-sm btn-primary play-track-btn" data-id="${track.id}">▶ ${currentLanguage === 'ru' ? 'Слушать' : 'Play'}</button>
-                            <button class="btn-icon like-btn" data-id="${track.id}" data-liked="false">❤️</button>
-                        </div>
-                        <div class="dl-count">📥 ${track.downloads}</div>
-                    </div>
-                `;
-            }).join('');
-
-            // Добавляем обработчики для кнопок "Слушать" и "Лайк"
-            document.querySelectorAll('.play-track-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const trackId = parseInt(btn.dataset.id);
-                    const idx = tracksData.findIndex(t => t.id === trackId);
-                    if (idx !== -1) {
-                        currentTrackIndex = idx;
-                        loadTrack(currentTrackIndex);
-                        audio.play().then(() => {
-                            isPlaying = true;
-                            playerPlay.textContent = '⏸';
-                        }).catch(e => console.warn(e));
-                    }
-                });
-            });
-
-            document.querySelectorAll('.like-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const trackId = parseInt(btn.dataset.id);
-                    const track = tracksData.find(t => t.id === trackId);
-                    if (track) {
-                        const isLiked = btn.classList.contains('liked');
-                        if (!isLiked) {
-                            track.likes = (track.likes || 0) + 1;
-                            btn.classList.add('liked');
-                            btn.style.animation = 'heartPop 0.5s ease';
-                            setTimeout(() => btn.style.animation = '', 500);
-                        } else {
-                            track.likes = Math.max(0, (track.likes || 0) - 1);
-                            btn.classList.remove('liked');
-                        }
-                        // Можно показать уведомление или обновить счетчик
-                    }
-                });
-            });
+        function renderMusic() {
+            if(!musicGrid) return;
+            musicGrid.innerHTML = tracksData.map(t => `
+                <div class="track-card">
+                    <img class="track-cover" src="${t.cover||''}" onerror="this.src='data:image/svg+xml,%3Csvg%3E'">
+                    <div class="track-title">${t.title}</div>
+                    <div class="track-meta">DarkSpirit</div>
+                    <button class="btn-sm btn-primary" onclick="window.playTrackById(${t.id})">▶ Слушать</button>
+                    <div class="dl-count">📥 ${t.downloads}</div>
+                </div>
+            `).join('');
         }
+        window.playTrackById = function(id) {
+            let idx = tracksData.findIndex(t=>t.id===id);
+            if(idx!==-1) { currentIndex=idx; loadTrack(currentIndex); audio.play().then(()=>{isPlaying=true;playBtn.innerText='⏸';}); }
+        };
+        renderMusic();
 
-        // Переключение вкладок
-        if (tabBtns.length) {
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    tabBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    const category = btn.dataset.tab;
-                    renderMusicGrid(category);
-                });
-            });
-        }
-
-        // ======================= ПЕРЕКЛЮЧЕНИЕ ЯЗЫКА =======================
-        const langBtns = document.querySelectorAll('.lang-btn');
-        function updateTexts(lang) {
-            currentLanguage = lang;
-            document.querySelectorAll('[data-ru][data-en]').forEach(el => {
-                const text = lang === 'ru' ? el.getAttribute('data-ru') : el.getAttribute('data-en');
-                if (text) el.innerText = text;
-            });
-            // Обновить заголовок трека в плеере
-            if (tracksData[currentTrackIndex]) {
-                updatePlayerUI(tracksData[currentTrackIndex]);
-            }
-            // Перерисовать каталог
-            const activeTab = document.querySelector('.tab-btn.active');
-            const category = activeTab ? activeTab.dataset.tab : 'all';
-            renderMusicGrid(category);
-        }
-
-        if (langBtns.length) {
-            langBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    langBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    const lang = btn.dataset.lang;
-                    updateTexts(lang);
-                });
-            });
-        }
-
-        // ======================= ИНИЦИАЛИЗАЦИЯ ПЛЕЕРА =======================
-        function initPlayer() {
-            if (!tracksData.length) return;
-            currentTrackIndex = 0;
-            loadTrack(0);
-            // Обработчики кнопок плеера
-            playerPlay.addEventListener('click', togglePlay);
-            playerPrev.addEventListener('click', prevTrack);
-            playerNext.addEventListener('click', nextTrack);
-            audio.addEventListener('timeupdate', updateProgress);
-            audio.addEventListener('ended', onTrackEnd);
-            progressBarBg.addEventListener('click', setProgress);
-        }
-
-        // Запуск после загрузки DOM
-        document.addEventListener('DOMContentLoaded', () => {
-            initPlayer();
-            renderMusicGrid('all');   // отображаем все треки
-            // Анимация появления элементов
-            const fadeElements = document.querySelectorAll('.fade-in-up, .fade-in');
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.1 });
-            fadeElements.forEach(el => observer.observe(el));
-            // Счётчики анимации (если нужно)
-            const statNumbers = document.querySelectorAll('.stat-number');
-            statNumbers.forEach(el => {
-                const target = parseInt(el.dataset.target);
-                if (target) {
-                    let current = 0;
-                    const step = target / 50;
-                    const timer = setInterval(() => {
-                        current += step;
-                        if (current >= target) {
-                            el.innerText = target;
-                            clearInterval(timer);
-                        } else {
-                            el.innerText = Math.floor(current);
-                        }
-                    }, 30);
-                }
-            });
+        // === ПРИНУДИТЕЛЬНОЕ ОТОБРАЖЕНИЕ ВСЕХ СЕКЦИЙ (УБИРАЕМ ЗАВИСАНИЕ АНИМАЦИИ) ===
+        document.querySelectorAll('.fade-in-up, .fade-in').forEach(el => {
+            el.classList.add('visible');
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
         });
+
+        // === ЗАГРУЗКА ПЕРВОГО ТРЕКА ===
+        if(tracksData.length) loadTrack(0);
     })();
 </script>
 </body>
