@@ -1632,6 +1632,15 @@ margin-bottom: 0.4rem;
             }, 300);
 
             console.log('DarkSpirit Portfolio — Ready.');
+            // ============ VOLUME CONTROL ============
+const volumeSlider = document.getElementById('volumeSlider');
+            if (volumeSlider) {
+                volumeSlider.addEventListener('input', (e) => {
+                    audioElement.volume = e.target.value;
+                });
+            }
+
+            console.log('DarkSpirit Portfolio — Ready.');
         })();
     </script>
 </body>
