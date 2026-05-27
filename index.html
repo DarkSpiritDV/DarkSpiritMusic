@@ -1269,7 +1269,7 @@ margin-bottom: 0.4rem;
     </section>
 
     <!-- ==================== SUPPORT ==================== -->
-    <section id="support">
+   <section id="support">
         <div class="container">
             <div class="support-block fade-in-up">
                 <h2 data-ru="Поддержать проект" data-en="Support the Project" style="margin-bottom:1rem;">Поддержать проект</h2>
@@ -1280,7 +1280,6 @@ margin-bottom: 0.4rem;
         </div>
     </section>
 
-    <!-- ==================== FOOTER ==================== -->
     <footer class="footer">
         <div class="container">
             <div class="footer-links">
@@ -1296,137 +1295,6 @@ margin-bottom: 0.4rem;
 
     <script>
         (function() {
-            // ============ LANGUAGE SWITCHER ============
-            let currentLang = 'ru';
-            const langBtns = document.querySelectorAll('.lang-btn');
-            const allTranslatable = document.querySelectorAll('[data-ru][data-en]');
-
-            function switchLanguage(lang) {
-                currentLang = lang;
-                langBtns.forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
-                allTranslatable.forEach(el => {
-                    const text = el.dataset[lang];
-                    if (text !== undefined) {
-                        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                            el.placeholder = text;
-                        } else if (el.tagName === 'SELECT') {
-                            // For select, we update the selected option
-                            const selectedOption = el.options[el.selectedIndex];
-                            if (selectedOption && selectedOption.dataset[lang]) {
-                                selectedOption.textContent = selectedOption.dataset[lang];
-                            }
-                            // Update all options
-                            Array.from(el.options).forEach(opt => {
-                                if (opt.dataset[lang]) opt.textContent = opt.dataset[
-                                    lang];
-                            });
-                        } else {
-                            el.textContent = text;
-                        }
-                    }
-                });
-                // Update select elements explicitly
-                document.querySelectorAll('select').forEach(sel => {
-                    Array.from(sel.options).forEach(opt => {
-                        if (opt.dataset[currentLang]) opt.textContent = opt.dataset[
-                            currentLang];
-                    });
-                });
-                // Update player track name if it has data attributes
-                const playerTrack = document.getElementById('playerTrack');
-                if (playerTrack && playerTrack.dataset[currentLang]) {
-                    playerTrack.textContent = playerTrack.dataset[currentLang];
-                }
-                localStorage.setItem('darkspirit-lang', lang);
-            }
-
-            langBtns.forEach(btn => {
-                btn.addEventListener('click', () => switchLanguage(btn.dataset.lang));
-            });
-
-            // Load saved language
-            const savedLang = localStorage.getItem('darkspirit-lang');
-            if (savedLang && (savedLang === 'ru' || savedLang === 'en')) {
-                switchLanguage(savedLang);
-            }
-
-            // ============ MOBILE MENU ============
-            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-            const nav = document.getElementById('nav');
-            const navLinks = nav.querySelectorAll('a');
-
-            mobileMenuToggle.addEventListener('click', () => {
-                nav.classList.toggle('open');
-            });
-            navLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    nav.classList.remove('open');
-                });
-            });
-            // Close menu on outside click
-            document.addEventListener('click', (e) => {
-                if (!nav.contains(e.target) && !mobileMenuToggle.contains(e.target) && nav
-                    .classList.contains('open')) {
-                    nav.classList.remove('open');
-                }
-            });
-
-            // ============ HEADER SCROLL EFFECT ============
-            const header = document.getElementById('header');
-            window.addEventListener('scroll', () => {
-                header.classList.toggle('scrolled', window.scrollY > 50);
-            });
-
-            // ============ SCROLL ANIMATIONS (Intersection Observer) ============
-            const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -50px 0px' };
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, observerOptions);
-
-            document.querySelectorAll('.fade-in-up, .fade-in').forEach(el => observer.observe(el));
-
-            // ============ COUNTER ANIMATION ============
-            function animateCounter(el, target, duration = 1800) {
-                const start = 0;
-                const startTime = performance.now();
-
-                function update(now) {
-                    const elapsed = now - startTime;
-                    const progress = Math.min(elapsed / duration, 1);
-                    const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-                    const current = Math.floor(start + (target - start) * eased);
-                    el.textContent = current.toLocaleString('ru-RU');
-                    if (progress < 1) {
-                        requestAnimationFrame(update);
-                    } else {
-                        el.textContent = target.toLocaleString('ru-RU');
-                    }
-                }
-                requestAnimationFrame(update);
-            }
-
-            const counterObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const el = entry.target;
-                        const target = parseInt(el.dataset.target);
-                        if (target && !el.dataset.animated) {
-                            el.dataset.animated = 'true';
-                            animateCounter(el, target);
-                        }
-                        counterObserver.unobserve(el);
-                    }
-                });
-            }, { threshold: 0.5 });
-
-            document.querySelectorAll('.stat-number').forEach(el => counterObserver.observe(el));
-
-          // ============ MUSIC DATA ============
             const tracksData = [
                 {
                     id: 1, 
@@ -1436,211 +1304,51 @@ margin-bottom: 0.4rem;
                     cover: 'Запятая у окна.png', 
                     desc: 'Сингл в стиле синт-поп.', 
                     descEn: 'Synth-pop single.', 
-                    // Обрати внимание: в английском тексте я экранировал кавычки с помощью бэкслеша (\')
-                    lyrics: 'Все по двое, я одна Как запятая у окна Мне бы найти того, что прочтет эти строки По глазам в глаза, напрямик без границ, Все по двое, жду с кем я маску сниму С кем можно просто быть собой и в тишине уйти не одной...\nИли пара строк.',
-                    lyricsEn: 'Everyone\'s in pairs, I\'m alone Like a comma by the window I wish I could find someone who would read these lines Eye to eye, without any boundaries Everyone\'s in pairs, waiting for someone to take off their mask With someone I can just be myself and leave in silence...',
+                    lyrics: 'Все по двое...',
+                    lyricsEn: 'Everyone...',
                     downloads: 0,
                     audioSrc: 'zapyataya.mp3',
-                    likes: 35
-                },
-                // Если есть еще трек, добавляешь запятую и копируешь блок выше
+                    likes: 35 
+                }
             ];
 
-            let currentTrackIndex = -1;
-            let isPlaying = false;
+            // Основные переменные
             const audioElement = document.getElementById('audioElement');
             const playerPlay = document.getElementById('playerPlay');
-            const playerCover = document.getElementById('playerCover');
-            const playerTrackEl = document.getElementById('playerTrack');
-            const progressBarFill = document.getElementById('progressBarFill');
-            const progressBarBg = document.getElementById('progressBarBg');
-            const timeDisplay = document.getElementById('timeDisplay');
-            let likedTracks = JSON.parse(localStorage.getItem('darkspirit-liked') || '[]');
-            let likesCounts = JSON.parse(localStorage.getItem('darkspirit-likes-count') || '{}');
+            let isPlaying = false;
+            let currentTrackIndex = 0;
 
-            // Инициализация счетчика лайков (берем базовое число, если трек новый)
-            tracksData.forEach(t => {
-                // Если хочешь задать стартовое число лайков, добавь в tracksData строчку: likes: 150,
-                if (!(t.id in likesCounts)) likesCounts[t.id] = t.likes || 12; 
-            });
-            localStorage.setItem('darkspirit-likes-count', JSON.stringify(likesCounts));
-
-            function saveLiked() {
-                localStorage.setItem('darkspirit-liked', JSON.stringify(likedTracks));
-                localStorage.setItem('darkspirit-likes-count', JSON.stringify(likesCounts));
+            function loadTrack(index) {
+                currentTrackIndex = index;
+                audioElement.src = tracksData[index].audioSrc;
+                audioElement.load();
             }
 
-            // ... (тут остаются функции loadTrack, togglePlay и simulatePlayback без изменений) ...
-
-            // ============ RENDER MUSIC GRID ============
-            const musicGrid = document.getElementById('musicGrid');
-            const musicTabs = document.getElementById('musicTabs');
-            let activeTab = 'pop-rap';
-
-            function renderTracks(filter) {
-                musicGrid.innerHTML = '';
-                const filtered = filter === 'all' ? tracksData : tracksData.filter(t => t.category === filter);
-                
-                filtered.forEach(track => {
-                    const card = document.createElement('div');
-                    card.className = 'track-card fade-in-up';
-                    card.innerHTML = `
-                <img class="track-cover" src="${track.cover}" alt="${track.title}" loading="lazy">
-                <div class="track-title">${currentLang === 'ru' ? track.title : (track.titleEn || track.title)}</div>
-                <div class="track-meta">DarkSpirit</div>
-                <div class="track-actions">
-                  <button class="btn-icon play-track-btn" data-id="${track.id}" title="Play">▶</button>
-                  <button class="btn-icon like-btn ${likedTracks.includes(track.id) ? 'liked' : ''}" data-id="${track.id}" title="Like">❤</button>
-                </div>
-                <div class="dl-count" id="likes-count-${track.id}">${likesCounts[track.id]} лайков</div>
-              `;
-                    
-                    // Клик по обложке
-                    card.querySelector('.track-cover').addEventListener('click', () => openModal(track));
-                    
-                    // Клик по Play
-                    card.querySelector('.play-track-btn').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const idx = tracksData.findIndex(t => t.id === track.id);
-                        if (idx !== -1) {
-                            loadTrack(idx);
-                            if (!isPlaying) togglePlay();
-                            else if (currentTrackIndex !== idx) {
-                                loadTrack(idx);
-                                if (!isPlaying) togglePlay();
-                            }
-                        }
-                    });
-                    
-                    // Клик по Лайку
-                    card.querySelector('.like-btn').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        toggleLike(track.id, e.target);
-                    });
-                    
-                    observer.observe(card);
-                    musicGrid.appendChild(card);
-                });
-            }
-
-            function toggleLike(trackId, btnEl) {
-                const countEl = document.getElementById('likes-count-' + trackId);
-                
-                if (likedTracks.includes(trackId)) {
-                    likedTracks = likedTracks.filter(id => id !== trackId);
-                    btnEl.classList.remove('liked');
-                    likesCounts[trackId] = Math.max(0, likesCounts[trackId] - 1); // Убираем лайк
+            function togglePlay() {
+                if (audioElement.paused) {
+                    audioElement.play().then(() => {
+                        isPlaying = true;
+                        playerPlay.textContent = '⏸';
+                    }).catch(e => console.error("Ошибка запуска:", e));
                 } else {
-                    likedTracks.push(trackId);
-                    btnEl.classList.add('liked');
-                    // Анимация пульсации
-                    btnEl.style.animation = 'none';
-                    btnEl.offsetHeight; 
-                    btnEl.style.animation = 'heartPop 0.5s ease';
-                    likesCounts[trackId]++; // Добавляем лайк
+                    audioElement.pause();
+                    isPlaying = false;
+                    playerPlay.textContent = '▶';
                 }
-                
-                // Обновляем текст на карточке
-                if (countEl) countEl.textContent = likesCounts[trackId] + ' лайков';
-                saveLiked();
             }
 
-            musicTabs.addEventListener('click', (e) => {
-                if (e.target.classList.contains('tab-btn')) {
-                    musicTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                    e.target.classList.add('active');
-                    activeTab = e.target.dataset.tab;
-                    renderTracks(activeTab);
-                    document.querySelectorAll('#musicGrid .fade-in-up').forEach(el => observer.observe(el));
-                }
-            });
+            playerPlay.addEventListener('click', togglePlay);
 
-            renderTracks(activeTab);
-
-            // ============ MODAL ============
-            const modalOverlay = document.getElementById('modalOverlay');
-            const modalBody = document.getElementById('modalBody');
-            const modalClose = document.getElementById('modalClose');
-
-            function openModal(track) {
-                const title = currentLang === 'ru' ? track.title : (track.titleEn || track.title);
-                const desc = currentLang === 'ru' ? track.desc : (track.descEn || track.desc);
-                const lyrics = currentLang === 'ru' ? track.lyrics : (track.lyricsEn || track.lyrics);
-                modalBody.innerHTML = `
-              <h3>${title}</h3>
-              <p>${desc}</p>
-              <div class="modal-lyrics">${lyrics}</div>
-            `;
-                modalOverlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closeModal() {
-                modalOverlay.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-            modalClose.addEventListener('click', closeModal);
-            modalOverlay.addEventListener('click', (e) => {
-                if (e.target === modalOverlay) closeModal();
-            });
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal();
-            });
-
-            // ============ SERVICE FORM ============
-            document.getElementById('serviceForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                alert(currentLang === 'ru' ?
-                    'Заявка отправлена! Мы свяжемся с вами в ближайшее время.' :
-                    'Request sent! We will contact you shortly.');
-                this.reset();
-            });
-
-            // ============ PLAY LATEST RELEASE BUTTON ============
-            const playLatestBtn = document.getElementById('playLatestBtn');
-            if (playLatestBtn) {
-                playLatestBtn.addEventListener('click', (e) => {
-                    e.preventDefault(); // Останавливаем стандартный переход по ссылке
-                    const latestTrackIndex = 0; 
-                    
-                    if (currentTrackIndex !== latestTrackIndex) {
-                        loadTrack(latestTrackIndex);
-                    }
-                    
-                    if (!isPlaying) {
-                        togglePlay();
-                    }
-                    
-                    // Плавная прокрутка к плееру
-                    const playerWrapper = document.getElementById('playerWrapper');
-                    if(playerWrapper) {
-                        playerWrapper.scrollIntoView({ behavior: 'smooth' });
-                    }
-                });
-            }
-
-            // ============ INITIAL LOAD ============
-            // Trigger counter animation if hero is visible on load
-            setTimeout(() => {
-                document.querySelectorAll('.stat-number').forEach(el => {
-                    const rect = el.getBoundingClientRect();
-                    if (rect.top < window.innerHeight && !el.dataset.animated) {
-                        el.dataset.animated = 'true';
-                        animateCounter(el, parseInt(el.dataset.target));
-                    }
-                });
-            }, 300);
-
-console.log('DarkSpirit Portfolio — Ready.');
-
-            // ============ VOLUME CONTROL ============
+            // Регулятор громкости
             const volumeSlider = document.getElementById('volumeSlider');
             if (volumeSlider) {
                 volumeSlider.addEventListener('input', (e) => {
                     audioElement.volume = e.target.value;
                 });
             }
-        })(); 
+
+            console.log('DarkSpirit Portfolio — Ready.');
+        })();
     </script>
 </body>
 </html>
